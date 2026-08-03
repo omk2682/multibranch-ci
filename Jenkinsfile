@@ -62,5 +62,19 @@ pipeline {
                 )
             }
         }
+
+        stage('Docker Build and Publish') {
+            steps {
+                script {
+                    // Build Docker image using the Dockerfile
+                    def dockerImage = docker.build("devsecops-nexus:${BUILD_NUMBER}", ".")
+
+                    // Login to Artifactory Docker Registry and push image
+                    docker.withRegistry('http://13.48.128.196:8082', 'jfrog-credentials') {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
     }
 }
