@@ -48,10 +48,7 @@ pipeline {
 
         stage('Upload Artifact to JFrog') {
             steps {
-                sh '''
-                    jf c use jfrog-server
-                    jf rt upload "target/*.jar" "libs-release-local/"
-                '''
+               
             }
         }
 
