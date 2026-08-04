@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "54.145.247.149:8082/devsecops-nexus:${BUILD_NUMBER}"
+        IMAGE_NAME = "omkardile2682/devsecops-nexus:${BUILD_NUMBER}"
     }
 
     stages {
@@ -48,35 +48,20 @@ pipeline {
 
         stage('Upload Artifact to JFrog') {
             steps {
-                rtUpload(
-                    serverId: 'jfrog-server',
-                    spec: '''{
-                        "files": [
-                            {
-                                "pattern": "target/*.jar",
-                                "target": "libs-release-local/"
-                            }
-                        ]
-                    }'''
-                )
+                sh '''
+                    jf c use jfrog-server
+                    jf rt upload "target/*.jar" "libs-release-local/"
+                '''
             }
         }
 
         stage('Download Artifact from JFrog') {
             steps {
-                sh 'mkdir -p downloaded'
-
-                rtDownload(
-                    serverId: 'jfrog-server',
-                    spec: '''{
-                        "files": [
-                            {
-                                "pattern": "libs-release-local/**/*.jar",
-                                "target": "downloaded/"
-                            }
-                        ]
-                    }'''
-                )
+                sh '''
+                    mkdir -p downloaded
+                    jf c use jfrog-server
+                    jf rt download "libs-release-local/**/*.jar" "downloaded/"
+                '''
             }
         }
 
@@ -91,10 +76,17 @@ pipeline {
         stage('Docker Push to JFrog') {
             steps {
                 script {
-                    docker.withRegistry('http://54.145.247.149:8082', 'credentials-jfrog') {
-                        dockerImage.push()
+
+                    docker.withRegistry(
+                        'https://index.docker.io/v1/',
+                        'credentials-dockerhub'
+                    ) {
+
+                        dockerImage.push("${BUILD_NUMBER}")
                         dockerImage.push('latest')
+
                     }
+
                 }
             }
         }
