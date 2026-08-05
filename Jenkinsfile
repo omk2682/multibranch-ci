@@ -95,7 +95,7 @@ pipeline {
             steps {
                 sh '''
                 aws eks update-kubeconfig \
-                --region us-east-1 \
+                --region eu-north-1 \
                 --name my-eks-cluster
 
                 kubectl apply -f deployment.yaml
